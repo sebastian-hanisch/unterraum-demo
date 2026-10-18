@@ -54,8 +54,8 @@ st.markdown(
     """
 Das Periodogramm und seine Verwandten fragen nach der Leistung bei jeder Frequenz. Wer weiß, dass das Signal aus **wenigen reinen Linien in weißem Rauschen** besteht, kann mehr herausholen:
 Die **Kovarianzmatrix** der Daten zerfällt in einen **Signalunterraum** (so viele Dimensionen wie Komponenten, zwei je reelle Linie) und einen **Rauschunterraum**. **MUSIC** sucht die Frequenzen,
-deren Schwingung auf dem Rauschunterraum senkrecht steht; **Wurzel-MUSIC** und **ESPRIT** lesen sie als Nullstellen bzw. Eigenwerte ab. Zwei Linien im Abstand **eines** Bins, die jedes
-Periodogramm verschmiert, sind dann trennbar – **solange das Modell stimmt**: weißes Rauschen, bekannte Linienzahl, genug Daten.
+deren Schwingung auf dem Rauschunterraum senkrecht steht; **Wurzel-MUSIC** und **ESPRIT** lesen sie als Nullstellen bzw. Eigenwerte ab. Zwei Linien im Abstand **eines** Bins, die das
+Hann-Periodogramm meist verschmiert (nur 20 % getrennt), sind dann trennbar – **solange das Modell stimmt**: weißes Rauschen, bekannte Linienzahl, genug Daten.
 
 Dies ist die sechste Demo der Reihe „Spektral- und Wavelet-Analyse“, auf die **AR-Spektren** und die Demos davor aufbauend. Alles ist **simuliert**: Lage, Zahl und Stärke der Linien sind bekannt.
 Weiter unten: **🔬 Experimente**, **🚧 Wo die Annahmen enden** und **📐 Mathematische Formulierung**.
@@ -66,7 +66,7 @@ with st.expander("So funktionieren die Unterraumverfahren", expanded=True):
     st.markdown(
         """
 1. **Schnappschüsse:** Aus den Daten entstehen überlappende Abschnitte der Länge *m*; ihre Kovarianzmatrix (mit Vorwärts-Rückwärts-Mittel) wird zerlegt.
-2. **Unterräume:** Die größten Eigenwerte gehören zum Signal (zwei je reelle Linie), alle übrigen liegen bei der Rauschvarianz. Die **Linienzahl** schätzen **AIC** und **MDL** aus diesen Eigenwerten.
+2. **Unterräume:** Die größten Eigenwerte gehören zum Signal (zwei je reelle Linie), alle übrigen liegen um die Rauschvarianz herum (mit Streuung). Die **Linienzahl** schätzen **AIC** und **MDL** aus diesen Eigenwerten.
 3. **Drei Wege zu den Frequenzen:** **MUSIC** (Pseudospektrum mit Gipfeln), **Wurzel-MUSIC** (Polynom-Nullstellen), **ESPRIT** (Eigenwerte einer Verschiebungsmatrix).
 4. **Preis:** Die Verfahren liefern Frequenzen, kein Leistungsspektrum – die Höhe eines Gipfels ist keine Leistung. Falsche Ordnung oder gefärbtes Rauschen verschieben und vermehren die Gipfel.
         """
@@ -99,7 +99,7 @@ with st.sidebar:
     background = st.selectbox("Hintergrund", list(C.BACKGROUNDS), key="background_select",
                               help="Weißes Rauschen ist die Annahme der Verfahren. Gefärbt: Resonanz bei 200 Hz, mit gleicher oder zehnfacher Leistung gegen das weiße Niveau.")
     st.markdown("**Verfahren**")
-    m = st.selectbox("Größe m der Kovarianzmatrix", list(C.M_CHOICES), key="m_select", help=f"Bruchteil von n, mindestens {C.M_FLOOR}, höchstens n/2. Größer: schärfer, aber weniger Schnappschüsse.")
+    m = st.selectbox("Größe m der Kovarianzmatrix", list(C.M_CHOICES), key="m_select", help=f"Bruchteil von n, mindestens {C.M_FLOOR}, höchstens n/2. Größer: zunächst schärfer, bei sehr großer Matrix nicht mehr (dann bleiben weniger Schnappschüsse).")
     order_mode = st.selectbox("Zahl der Komponenten", list(C.ORDER_MODES), key="order_mode_select",
                               help="„fest“: Sie wählen p (zwei je Linie). AIC oder MDL: p folgt aus den Eigenwerten (bei ungerader Zahl wird aufgerundet).")
     if order_mode == "fest":
@@ -177,7 +177,7 @@ getattr(st, kind)(text)
 st.markdown("#### Genauigkeit einer einzelnen Linie gegen die Cramér-Rao-Schranke")
 acc = _experiment("accuracy")
 st.caption(f"Eine Linie, Matrix n/3, {C.EXP_ACC_RUNS} Läufe je Zelle. Gezeigt: RMSE der Frequenz geteilt durch die Schranke (Fehler ab {C.EXP_ACC_OUTLIER:g} Bins als Ausreißer ausgenommen, Anteil in Klammern). "
-           "Schwellenverhalten: Bei n = 64 steigt der Fehler unterhalb von etwa 0 dB weit über die Schranke, bei −6 dB kommen 10 bis 20 % Ausreißer hinzu.")
+           "Schwellenverhalten: Bei n = 64 steigt der Fehler der Unterraumverfahren und des Hann-Periodogramms unterhalb von etwa 0 dB weit über die Schranke, bei −6 dB kommen 10 bis 20 % Ausreißer hinzu.")
 st.dataframe(pd.DataFrame([{"n": r["n"], "SNR (dB)": de(r["snr"], 0), "Schranke (Bins)": de(r["crb"], 4),
                             **{k: f"{de(v['ratio'], 2)} ({de(100 * v['outliers'], 0)} %)" for k, v in r["methods"].items()}} for r in acc]), hide_index=True, width="stretch")
 st.plotly_chart(build_accuracy(acc), width="stretch", key="exp_accuracy")
@@ -241,7 +241,7 @@ st.markdown(
 | **Das Rauschen ist weiß** | Ein gefärbter Hintergrund hebt Eigenwerte an: Gipfel verschieben sich oder fehlen, die Linienzahl wird überschätzt. | AR-Spektren, Prewhitening |
 | **Die Linienzahl ist bekannt** | Zu kleine Ordnung: Linien fehlen, Frequenzen sind falsch. AIC überschätzt, MDL unterschätzt bei schwachen Linien. | Konfidenz und Falschalarm |
 | **Die Linien sind gleichzeitig vorhanden** | Kohärente (korrelierte) Quellen verringern den Rang des Signalunterraums; das Vorwärts-Rückwärts-Mittel hilft nur teilweise. | – |
-| **Genug Daten und Rauschabstand** | Unterhalb einer Schwelle (etwa 0 dB je Abtastwert bei n = 64) steigt der Fehler weit über die Cramér-Rao-Schranke und Ausreißer treten auf; die Schranke gilt nur darüber. | Schätztheorie |
+| **Genug Daten und Rauschabstand** | Unterhalb einer Schwelle (etwa 0 dB je Abtastwert bei n = 64) steigt der Fehler weit über die Cramér-Rao-Schranke und Ausreißer treten auf; die Schranke wird nur darüber erreicht. | Schätztheorie |
 | **Eine Linie ist kein Spektrum** | Das Pseudospektrum zeigt Lagen, nicht Leistungen; Höhen sind nicht vergleichbar. | Periodogramm, Multitaper |
 | **Stationär** | Wandern die Frequenzen, mittelt die Kovarianzmatrix über die ganze Aufzeichnung. | Spektrogramm |
 """,

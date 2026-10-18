@@ -401,13 +401,13 @@ def verdict_accuracy(rows: list[dict]) -> tuple[str, str]:
     m = r["methods"]
     return "info", (f"Bei n = {r['n']} und 5 dB liegt die Frequenzgenauigkeit des Rechteck-Periodogramms beim {de(m['Periodogramm, Rechteck']['ratio'], 2)}-fachen der Schranke, "
                     f"die von MUSIC beim {de(m['MUSIC']['ratio'], 2)}-fachen, die von ESPRIT beim {de(m['ESPRIT']['ratio'], 2)}-fachen. **Für eine einzelne Linie gewinnen die "
-                    "Unterraumverfahren nichts.**")
+                    "Unterraumverfahren gegenüber dem Rechteck-Periodogramm nichts.**")
 
 
 def verdict_count(rows: list[dict]) -> tuple[str, str]:
     r = [x for x in rows if x["lines"] == 2 and x["snr"] == 0.0][0]
     return "warning", (f"Bei zwei Linien und 0 dB je Abtastwert treffen MDL die Zahl der Komponenten in {de(100 * r['MDL']['right'], 0)} % der Läufe, AIC in {de(100 * r['AIC']['right'], 0)} % "
-                       f"(zu groß in {de(100 * r['AIC']['over'], 0)} %). **AIC überschätzt, MDL unterschätzt erst bei sehr schwachen Linien.**")
+                       f"(zu groß in {de(100 * r['AIC']['over'], 0)} %). **AIC überschätzt, MDL unterschätzt erst bei sehr schwachen Linien (ab etwa −6 dB), dort auch AIC.**")
 
 
 def verdict_matrix(rows: list[dict]) -> tuple[str, str]:
@@ -421,14 +421,14 @@ def verdict_matrix(rows: list[dict]) -> tuple[str, str]:
 def verdict_coloured(rows: list[dict]) -> tuple[str, str]:
     by = {r["label"]: r for r in rows}
     r = by["gefärbt, zehnfache Leistung"]
-    return "warning", (f"Auf einem Hintergrund mit zehnfacher Leistung finden MUSIC {de(100 * r['MUSIC'], 0)} % und ESPRIT {de(100 * r['ESPRIT'], 0)} % der Läufe beide Linien, AR {de(100 * r['Burg'], 0)} %; "
+    return "warning", (f"Auf einem Hintergrund mit zehnfacher Leistung finden MUSIC {de(100 * r['MUSIC'], 0)} % und ESPRIT {de(100 * r['ESPRIT'], 0)} % der Läufe beide Linien, AR {de(100 * r['Burg'], 0)} % (beide unter den drei höchsten Gipfeln); "
                        f"bei gleicher Leistung {de(100 * by['gefärbt, gleiche Leistung']['MUSIC'], 0)} %. **Die Annahme „weißes Rauschen“ trägt das Verfahren.**")
 
 
 def verdict_order(rows: list[dict]) -> tuple[str, str]:
     by = {r["p"]: r for r in rows}
     return "warning", (f"Mit Ordnung 2 statt 4 liegt der Frequenzfehler bei {de(by[2]['rmse'], 3)} Bins und {de(100 * by[2]['extra'], 0)} % der Läufe zeigen einen Zusatzgipfel; mit Ordnung 4 "
-                       f"{de(by[4]['rmse'], 3)} Bins, mit Ordnung 12 {de(by[12]['rmse'], 3)} Bins. **Zu kleine Ordnung schadet, zu große kaum.**")
+                       f"{de(by[4]['rmse'], 3)} Bins, mit Ordnung 12 {de(by[12]['rmse'], 3)} Bins. **Zu kleine Ordnung schadet; zu große kaum, solange man bei MUSIC nur die zwei höchsten Gipfel liest.**")
 
 
 def verdict_height(res: dict) -> tuple[str, str]:

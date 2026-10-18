@@ -74,7 +74,7 @@ PRESETS = {
 PRESET_HELP = {
     "Zwei Linien: 1 Bin Abstand": "Zwei gleich starke Linien genau 1 Bin auseinander, n = 64: MUSIC und ESPRIT finden beide; das Hann-Periodogramm zeigt nur einen Gipfel.",
     "Linienzahl: AIC gegen MDL": "Zwei Linien, Ordnung aus den Eigenwerten: MDL trifft die vier Komponenten, AIC schlägt mehr vor und fügt dem Modell Rauschkomponenten hinzu; die Frequenzen passen dann nicht mehr.",
-    "Eine Linie: nahe der Schranke": "Eine einzelne Linie: Alle Verfahren liegen dicht an der Cramér-Rao-Schranke; das Periodogramm ist dabei nicht schlechter als die Unterraumverfahren.",
+    "Eine Linie: nahe der Schranke": "Eine einzelne Linie: Alle Verfahren liegen dicht an der Cramér-Rao-Schranke; das Rechteck-Periodogramm ist dabei nicht schlechter als die Unterraumverfahren, das Hann-Periodogramm liegt etwas darüber.",
     "Gefärbtes Rauschen": "Hintergrund mit Resonanz und zehnfacher Leistung statt weißem Rauschen: Die Annahme „weiß“ bricht, MUSIC und ESPRIT verfehlen die Linien öfter.",
     "Zu kleine Ordnung": "Zwei Linien (vier Komponenten), aber Ordnung 2: Das Modell hat nur Platz für eine Linie, die andere fehlt in jeder Schätzung.",
 }

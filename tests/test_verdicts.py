@@ -83,7 +83,7 @@ def test_verdict_accuracy_uses_the_longest_series_at_five_db():
     kind, text = ev.verdict_accuracy(_acc_rows())
     assert kind == "info"
     assert text == ("Bei n = 256 und 5 dB liegt die Frequenzgenauigkeit des Rechteck-Periodogramms beim 0,92-fachen der Schranke, die von MUSIC beim 1,09-fachen, die von ESPRIT beim 0,95-fachen. "
-                    "**Für eine einzelne Linie gewinnen die Unterraumverfahren nichts.**")
+                    "**Für eine einzelne Linie gewinnen die Unterraumverfahren gegenüber dem Rechteck-Periodogramm nichts.**")
 
 
 def _count_rows(mdl=0.98, aic=0.67, over=0.33):
@@ -95,7 +95,7 @@ def test_verdict_count_picks_two_lines_at_zero_db():
     kind, text = ev.verdict_count(_count_rows())
     assert kind == "warning"
     assert text == ("Bei zwei Linien und 0 dB je Abtastwert treffen MDL die Zahl der Komponenten in 98 % der Läufe, AIC in 67 % (zu groß in 33 %). "
-                    "**AIC überschätzt, MDL unterschätzt erst bei sehr schwachen Linien.**")
+                    "**AIC überschätzt, MDL unterschätzt erst bei sehr schwachen Linien (ab etwa −6 dB), dort auch AIC.**")
 
 
 def _matrix_rows():
@@ -116,7 +116,7 @@ def test_verdict_coloured_text():
             {"label": "gefärbt, zehnfache Leistung", "MUSIC": 0.755, "ESPRIT": 0.67, "Burg": 0.995}]
     kind, text = ev.verdict_coloured(rows)
     assert kind == "warning"
-    assert text == ("Auf einem Hintergrund mit zehnfacher Leistung finden MUSIC 76 % und ESPRIT 67 % der Läufe beide Linien, AR 100 %; bei gleicher Leistung 97 %. "
+    assert text == ("Auf einem Hintergrund mit zehnfacher Leistung finden MUSIC 76 % und ESPRIT 67 % der Läufe beide Linien, AR 100 % (beide unter den drei höchsten Gipfeln); bei gleicher Leistung 97 %. "
                     "**Die Annahme „weißes Rauschen“ trägt das Verfahren.**")
 
 
@@ -126,7 +126,7 @@ def test_verdict_order_text():
     kind, text = ev.verdict_order(rows)
     assert kind == "warning"
     assert text == ("Mit Ordnung 2 statt 4 liegt der Frequenzfehler bei 0,116 Bins und 64 % der Läufe zeigen einen Zusatzgipfel; mit Ordnung 4 0,044 Bins, mit Ordnung 12 0,045 Bins. "
-                    "**Zu kleine Ordnung schadet, zu große kaum.**")
+                    "**Zu kleine Ordnung schadet; zu große kaum, solange man bei MUSIC nur die zwei höchsten Gipfel liest.**")
 
 
 def test_verdict_height_text():
